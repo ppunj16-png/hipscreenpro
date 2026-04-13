@@ -1,4 +1,1 @@
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Content-Type = "text/html; charset=UTF-8"
+{"id":"/netlify.toml","path":"/netlify.toml","sha":"4df826a37e26098f0c56eb1e39bfeadd6f504cbb","mime_type":"application/octet-stream","size":90,"site_id":"6989e5b5-faba-49c2-9717-265dfe8c661e","deploy_id":"69dca756437f1411a875baba"}
