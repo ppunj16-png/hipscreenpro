@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#059669">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Hip">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hip">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HipScreen Pro — VPARC</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:#00b4c8;--teal-dark:#008b9a;--teal-deep:#006672;
+    --ink:#0d1f22;--ink2:#1a3238;--mist:#e8f6f8;--white:#ffffff;
+    --warn:#e67e22;--danger:#c0392b;--ok:#27ae60;
+    --border:#c5e8ed;--card:#f4fbfc;--radius:10px;
+    --accent:#a855f7;--accent2:#7c3aed;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Mono',monospace;background:#f0f8fa;color:var(--ink);min-height:100vh;}
+  .header{background:var(--ink2);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.3);}
+  .header-logo{width:38px;height:38px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;}
+  .header-text h1{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:#fff;letter-spacing:-0.3px;}
+  .header-text p{font-size:10px;color:#c4b5fd;margin-top:1px;}
+  .header-badge{margin-left:auto;background:rgba(168,85,247,0.15);color:#c4b5fd;font-size:10px;padding:4px 10px;border-radius:20px;font-weight:500;border:1px solid rgba(168,85,247,0.3);white-space:nowrap;}
+  .pt-bar{background:var(--ink);padding:10px 20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--teal-deep);}
+  .pt-field{display:flex;flex-direction:column;gap:2px;}
+  .pt-field label{font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:0.8px;}
+  .pt-field input,.pt-field select{background:rgba(255,255,255,0.07);border:1px solid var(--teal-deep);color:#fff;font-family:'DM Mono',monospace;font-size:12px;padding:5px 10px;border-radius:6px;min-width:100px;}
+  .pt-field input::placeholder{color:rgba(255,255,255,0.3);}
+  .pt-save{margin-left:auto;background:var(--accent);color:#fff;border:none;padding:7px 16px;border-radius:6px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+  .tabs-wrapper{background:var(--ink2);border-bottom:2px solid var(--accent2);overflow-x:auto;}
+  .tabs{display:flex;padding:0 16px;min-width:max-content;}
+  .tab{padding:12px 16px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all 0.2s;}
+  .tab:hover{color:rgba(255,255,255,0.7);}
+  .tab.active{color:#c4b5fd;border-bottom-color:var(--accent);}
+  .content{padding:16px 16px 80px;max-width:900px;margin:0 auto;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;}
+  .card-head{background:var(--ink);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+  .card-head h3{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;flex:1;}
+  .card-head .badge{font-size:9px;background:rgba(168,85,247,0.2);color:#c4b5fd;padding:3px 8px;border-radius:10px;}
+  .card-head .toggle{color:var(--accent);font-size:16px;transition:transform 0.2s;}
+  .card-head.collapsed .toggle{transform:rotate(-90deg);}
+  .card-body{padding:14px 16px;}
+  .sec-label{font-size:10px;color:var(--teal-dark);text-transform:uppercase;letter-spacing:1px;font-weight:500;margin-bottom:8px;margin-top:14px;border-left:3px solid var(--accent);padding-left:8px;}
+  .sec-label:first-child{margin-top:0;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  .form-row.three{grid-template-columns:1fr 1fr 1fr;}
+  .form-row.one{grid-template-columns:1fr;}
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:10px;color:var(--teal-dark);font-weight:500;}
+  .field input,.field select,.field textarea{border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);background:var(--card);transition:border 0.2s;}
+  .field textarea{resize:vertical;min-height:60px;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:#fff;}
+  .check-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;}
+  .check-item{display:flex;align-items:flex-start;gap:8px;padding:6px 10px;background:var(--card);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.15s;}
+  .check-item:hover{border-color:var(--accent);background:var(--mist);}
+  .check-item input[type="checkbox"]{margin-top:2px;accent-color:var(--accent);flex-shrink:0;}
+  .check-item span{font-size:11px;color:var(--ink);}
+  .check-item.flagged{background:#fff0ee;border-color:#e74c3c;}
+  .check-item.flagged span{color:#c0392b;}
+  .test-card{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
+  .test-head{padding:11px 14px;background:var(--card);display:flex;align-items:center;gap:10px;cursor:pointer;}
+  .test-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;flex:1;color:var(--ink);}
+  .test-tags{display:flex;gap:5px;flex-wrap:wrap;}
+  .tag{font-size:9px;padding:2px 7px;border-radius:10px;font-weight:500;}
+  .tag.sens{background:#e8f8ee;color:#1e8449;border:1px solid #a9dfbf;}
+  .tag.spec{background:#eaf0fb;color:#1a5276;border:1px solid #aed6f1;}
+  .tag.oa{background:#fdf2e9;color:#935116;border:1px solid #f0b27a;}
+  .tag.labral{background:#f4ecf7;color:#6c3483;border:1px solid #d2b4de;}
+  .tag.impinge{background:#e8f8f5;color:#1d6a52;border:1px solid #a2d9ce;}
+  .tag.muscle{background:#fef9e7;color:#7d6608;border:1px solid #f9e79f;}
+  .test-expand{font-size:14px;color:var(--accent);transition:transform 0.2s;}
+  .test-expand.open{transform:rotate(90deg);}
+  .test-body{display:none;padding:12px 14px;background:#fff;border-top:1px solid var(--border);}
+  .test-body.open{display:block;}
+  .test-section{margin-bottom:10px;}
+  .test-section h5{font-size:10px;text-transform:uppercase;color:var(--teal-dark);letter-spacing:0.8px;margin-bottom:5px;}
+  .test-section p{font-size:11px;line-height:1.7;color:#2c3e50;}
+  .test-result{display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+  .test-result label{font-size:11px;color:var(--ink);font-weight:500;}
+  .result-btns{display:flex;gap:6px;}
+  .rbtn{padding:5px 14px;border-radius:6px;border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;background:var(--card);color:var(--ink);transition:all 0.15s;}
+  .rbtn.pos{border-color:#e74c3c;color:#c0392b;}
+  .rbtn.pos.sel{background:#e74c3c;color:#fff;}
+  .rbtn.neg{border-color:#27ae60;color:#1e8449;}
+  .rbtn.neg.sel{background:#27ae60;color:#fff;}
+  .rbtn.equi{border-color:var(--warn);color:var(--warn);}
+  .rbtn.equi.sel{background:var(--warn);color:#fff;}
+  .test-notes{flex:1;}
+  .test-notes input{width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-family:'DM Mono',monospace;font-size:11px;}
+  .rom-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .rom-table th{background:var(--ink);color:#fff;padding:8px 10px;text-align:left;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;}
+  .rom-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  .rom-table tr:nth-child(even) td{background:var(--card);}
+  .rom-input{width:70px;border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-family:'DM Mono',monospace;font-size:12px;text-align:center;}
+  .rom-normal{font-size:10px;color:#7f8c8d;}
+  .pain-sel{padding:3px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;font-family:'DM Mono',monospace;background:var(--card);}
+  .neuro-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .neuro-table th{background:var(--accent2);color:#fff;padding:7px 10px;font-family:'Syne',sans-serif;font-size:10px;}
+  .neuro-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  .neuro-table tr:nth-child(even) td{background:var(--card);}
+  .grade-sel{padding:3px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;font-family:'DM Mono',monospace;}
+  .score-card{background:var(--ink);color:#fff;border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+  .score-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:#c4b5fd;}
+  .score-q{margin-bottom:12px;}
+  .score-q p{font-size:11px;color:#cde8ea;margin-bottom:6px;}
+  .score-q select{background:var(--ink2);border:1px solid var(--teal-deep);color:#fff;font-family:'DM Mono',monospace;font-size:11px;padding:5px 10px;border-radius:6px;width:100%;}
+  .score-result{background:rgba(168,85,247,0.15);border-radius:8px;padding:12px;text-align:center;margin-top:14px;border:1px solid rgba(168,85,247,0.3);}
+  .score-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#c4b5fd;}
+  .score-label{font-size:11px;color:#a0d8e0;margin-top:4px;}
+  .dx-category{margin-bottom:16px;}
+  .dx-category h4{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+  .dx-item{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all 0.15s;}
+  .dx-item:hover{border-color:var(--accent);background:var(--mist);}
+  .dx-item.selected{border-color:var(--accent);background:#f3e8ff;}
+  .dx-item input[type="checkbox"]{margin-top:3px;accent-color:var(--accent);flex-shrink:0;}
+  .dx-item-info h5{font-size:12px;font-weight:500;color:var(--ink);}
+  .dx-item-info p{font-size:10px;color:#7f8c8d;margin-top:2px;line-height:1.5;}
+  .dx-item-info .icd{font-size:9px;color:var(--accent2);margin-top:3px;background:#f3e8ff;display:inline-block;padding:1px 6px;border-radius:4px;}
+  .log-entry{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;}
+  .log-entry-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+  .log-entry-header h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--accent2);}
+  .log-entry-header span{font-size:10px;color:#95a5a6;}
+  .log-entry p{font-size:11px;color:#2c3e50;line-height:1.6;}
+  .log-actions{display:flex;gap:8px;margin-top:10px;}
+  .btn{padding:7px 16px;border-radius:7px;border:none;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--accent2);}
+  .btn-danger{background:#e74c3c;color:#fff;}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--ink);}
+  .log-toolbar{display:flex;gap:10px;margin-bottom:16px;}
+  .log-textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:12px;min-height:100px;resize:vertical;background:var(--card);}
+  .summary-bar{background:var(--ink);color:#fff;border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;}
+  .sum-item{display:flex;flex-direction:column;gap:2px;}
+  .sum-item .sum-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#c4b5fd;}
+  .sum-item .sum-lbl{font-size:9px;color:#7ecdd8;text-transform:uppercase;letter-spacing:0.5px;}
+  .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .filter-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.15s;color:var(--ink);}
+  .filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .alert-box{padding:12px 14px;border-radius:8px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;}
+  .alert-box.red{background:#fff0ee;border:1px solid #f1948a;}
+  .alert-box.yellow{background:#fffde7;border:1px solid #f9ca24;}
+  .alert-box .alert-icon{font-size:18px;flex-shrink:0;}
+  .alert-box p{font-size:11px;color:var(--ink);line-height:1.6;}
+  .vas-wrapper{padding:10px 0;}
+  .vas-label{display:flex;justify-content:space-between;font-size:9px;color:#7f8c8d;margin-bottom:4px;}
+  .vas-track{position:relative;height:8px;border-radius:4px;background:linear-gradient(to right,#27ae60,#f1c40f,#e74c3c);margin-bottom:6px;}
+  .vas-slider{width:100%;height:8px;opacity:0;position:absolute;top:0;cursor:pointer;margin:0;}
+  .vas-thumb{position:absolute;top:50%;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--accent);transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:left 0.1s;pointer-events:none;}
+  .vas-value{text-align:center;font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--accent2);}
+  @media(max-width:600px){.form-row{grid-template-columns:1fr;}.form-row.three{grid-template-columns:1fr 1fr;}.check-grid{grid-template-columns:1fr 1fr;}.content{padding:12px 10px 80px;}}
+
+  /* ── FLOATING ACTION BAR ── */
+  .fab-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;display:flex;box-shadow:0 -4px 20px rgba(0,0,0,0.25);}
+  .fab-btn{flex:1;padding:14px 10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter 0.15s;}
+  .fab-btn:active{filter:brightness(0.9);}
+  .fab-wa{background:#25D366;color:#fff;}
+  .fab-pdf{background:var(--ink2);color:white;border-left:1px solid rgba(255,255,255,0.1);}
+  .fab-icon{font-size:18px;}
+
+  /* ── PRINT / PDF ── */
+  @media print {
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+    body{background:white !important;font-size:11px;}
+    .header{position:relative !important;background:#1a3238 !important;color:white !important;padding:14px 20px;}
+    .pt-save,.btn,.log-actions,.tabs-wrapper,.fab-bar{display:none !important;}
+    .pt-bar{background:#1a3238 !important;}
+    .content{padding:10px !important;}
+    .panel{display:block !important;page-break-after:always;}
+    .panel:last-child{page-break-after:avoid;}
+    .card{border:1px solid #ccc !important;box-shadow:none !important;margin-bottom:10px;}
+    .card-head{background:#1a3238 !important;color:white !important;}
+    .rbtn.sel.pos{background:#fee2e2 !important;border-color:#ef4444 !important;}
+    .rbtn.sel.neg{background:#dcfce7 !important;border-color:#22c55e !important;}
+    table{width:100%;border-collapse:collapse;}
+    th,td{border:1px solid #ddd;padding:4px 6px;font-size:10px;}
+    input,select,textarea{border:1px solid #bbb !important;background:white !important;color:#333 !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">HP</div>
+  <div class="header-text">
+    <h1>HipScreen Pro</h1>
+    <p>Hip Pain · Comprehensive Assessment</p>
+  </div>
+  <div class="header-badge">VPARC v1.0</div>
+</div>
+
+<div class="pt-bar">
+  <div class="pt-field"><label>Patient Name</label><input type="text" id="ptName" placeholder="Full name"></div>
+  <div class="pt-field"><label>Age</label><input type="number" id="ptAge" placeholder="yrs" style="min-width:60px;max-width:70px"></div>
+  <div class="pt-field"><label>Sex</label><select id="ptSex"><option value="">-</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+  <div class="pt-field"><label>Date</label><input type="date" id="ptDate"></div>
+  <div class="pt-field"><label>ID / MRN</label><input type="text" id="ptId" placeholder="MR-xxxx"></div>
+  <button class="pt-save" onclick="savePatient()">Save</button>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">History</div>
+    <div class="tab" onclick="switchTab(1)">ROM & MMT</div>
+    <div class="tab" onclick="switchTab(2)">Special Tests</div>
+    <div class="tab" onclick="switchTab(3)">Neuro Screen</div>
+    <div class="tab" onclick="switchTab(4)">Differential Dx</div>
+    <div class="tab" onclick="switchTab(5)">Outcome Scores</div>
+    <div class="tab" onclick="switchTab(6)">Diagnosis Log</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- TAB 0: HISTORY -->
+<div class="panel active" id="tab0">
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)"><h3>Chief Complaint & Onset</h3><span class="badge">Subjective</span><span class="toggle">▾</span></div>
+    <div class="card-body">
+      <div class="form-row one"><div class="field"><label>Chief Complaint</label><textarea id="cc" placeholder="e.g. 'Right groin pain, worse with walking and climbing stairs'"></textarea></div></div>
+      <div class="form-row three">
+        <div class="field"><label>Side Affected</label><select id="side"><option>-</option><option>Right</option><option>Left</option><option>Bilateral</option></select></div>
+        <div class="field"><label>Duration</label><input type="text" id="dur" placeholder="e.g. 6 months"></div>
+        <div class="field"><label>Onset Type</label><select><option>-</option><option>Sudden / Traumatic</option><option>Gradual / Insidious</option><option>Post-operative</option><option>Congenital</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Pain Location</label><select><option>-</option><option>Groin / Anterior</option><option>Lateral (Trochanteric)</option><option>Posterior / Buttock</option><option>Medial thigh</option><option>Deep / Central</option><option>Diffuse / Global</option></select></div>
+        <div class="field"><label>Activity Level</label><select><option>-</option><option>Sedentary</option><option>Light activity</option><option>Moderately active</option><option>Very active / Athlete</option></select></div>
+      </div>
+      <div class="sec-label">Pain Characteristics</div>
+      <div class="form-row three">
+        <div class="field"><label>Quality</label><select><option>-</option><option>Deep aching</option><option>Sharp / Catching</option><option>Burning</option><option>Clicking / Clunking</option><option>Locking</option><option>Stiffness</option></select></div>
+        <div class="field"><label>Pattern</label><select><option>-</option><option>Constant</option><option>Intermittent</option><option>Activity-related</option><option>Nocturnal</option></select></div>
+        <div class="field"><label>Onset of Symptoms</label><select><option>-</option><option>Start of activity</option><option>During activity</option><option>After activity</option><option>At rest</option><option>Night pain</option></select></div>
+      </div>
+      <div class="sec-label">Pain Intensity (NRS 0–10)</div>
+      <div class="vas-wrapper">
+        <div class="vas-label"><span>0 — No Pain</span><span>10 — Worst</span></div>
+        <div class="vas-track"><input type="range" class="vas-slider" id="vasSlider" min="0" max="10" value="5" oninput="updateVAS()"><div class="vas-thumb" id="vasThumb" style="left:50%"></div></div>
+        <div class="vas-value" id="vasValue">5</div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Aggravating Factors</label><textarea placeholder="e.g. Putting on socks, squatting, prolonged sitting, pivoting, stairs"></textarea></div>
+        <div class="field"><label>Relieving Factors</label><textarea placeholder="e.g. Rest, anti-inflammatories, heat, changing position"></textarea></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Mechanical Symptoms</label><select><option>-</option><option>None</option><option>Clicking (painless)</option><option>Clunking (painful)</option><option>Locking</option><option>Giving way</option><option>Catching</option></select></div>
+        <div class="field"><label>Walking Distance</label><select><option>-</option><option>Unlimited</option><option>&gt;1 km</option><option>500m–1km</option><option>&lt;500m</option><option>Housebound</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)"><h3>Red Flags & Serious Pathology</h3><span class="badge" style="background:rgba(231,76,60,0.2);color:#f1948a">⚠ Critical</span><span class="toggle">▾</span></div>
+    <div class="card-body">
+      <div class="alert-box red"><span class="alert-icon">🚨</span><p><strong>Hip red flags require urgent medical assessment.</strong> Rule out avascular necrosis (especially steroid use/alcohol), septic arthritis, fracture, slipped capital femoral epiphysis (paeds), malignancy.</p></div>
+      <div class="check-grid">
+        <label class="check-item flagged"><input type="checkbox"> <span>Fever / systemic illness</span></label>
+        <label class="check-item flagged"><input type="checkbox"> <span>Constant severe pain (non-mechanical)</span></label>
+        <label class="check-item flagged"><input type="checkbox"> <span>History of cancer / blood disorders</span></label>
+        <label class="check-item flagged"><input type="checkbox"> <span>Prolonged corticosteroid use</span></label>
+        <label class="check-item flagged"><input type="checkbox"> <span>Excessive alcohol intake</span></label>
+        <label class="check-item flagged"><input type="checkbox"> <span>Unexplained weight loss</span></label>
+        <label class="check-item flagged"><input type="checkbox"> <span>Child with hip pain + limp (SCFE/Perthes)</span></label>
+        <label class="check-item flagged"><input type="checkbox"> <span>Night sweats</span></label>
+        <label class="check-item flagged"><input type="checkbox"> <span>Progressive loss of all ROM</span></label>
+        <label class="check-item flagged"><input type="checkbox"> <span>Groin lump / lymphadenopathy</span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)"><h3>Past Medical History</h3><span class="badge">PMH</span><span class="toggle">▾</span></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="field"><label>Previous Hip Injuries</label><input type="text" placeholder="e.g. Dislocation, labral tear, fracture"></div>
+        <div class="field"><label>Previous Surgeries</label><input type="text" placeholder="e.g. THR, arthroscopy, osteotomy"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Comorbidities</label><textarea placeholder="e.g. Rheumatoid arthritis, gout, OA, AVN, Perthes' disease"></textarea></div>
+        <div class="field"><label>Medications</label><textarea placeholder="e.g. NSAIDs, steroids, DMARDs, anticoagulants"></textarea></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Imaging (X-ray / MRI / CT)</label><textarea placeholder="e.g. Joint space narrowing, cam/pincer morphology, labral tear, AVN"></textarea></div>
+        <div class="field"><label>Sport / Recreational History</label><textarea placeholder="e.g. Football, running, dance, martial arts"></textarea></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 1: ROM & MMT -->
+<div class="panel" id="tab1">
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)"><h3>Hip Range of Motion</h3><span class="badge">Goniometry</span><span class="toggle">▾</span></div>
+    <div class="card-body">
+      <table class="rom-table">
+        <thead><tr><th>Movement</th><th>Normal</th><th>Right Active (°)</th><th>Right Passive (°)</th><th>Left Active (°)</th><th>Left Passive (°)</th><th>Pain</th></tr></thead>
+        <tbody>
+          <tr><td>Flexion</td><td class="rom-normal">0–120°</td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><select class="pain-sel"><option>-</option><option>None</option><option>R pain</option><option>L pain</option><option>Bilateral</option></select></td></tr>
+          <tr><td>Extension</td><td class="rom-normal">0–20°</td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><select class="pain-sel"><option>-</option><option>None</option><option>R pain</option><option>L pain</option><option>Bilateral</option></select></td></tr>
+          <tr><td>Abduction</td><td class="rom-normal">0–45°</td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><select class="pain-sel"><option>-</option><option>None</option><option>R pain</option><option>L pain</option><option>Bilateral</option></select></td></tr>
+          <tr><td>Adduction</td><td class="rom-normal">0–30°</td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><select class="pain-sel"><option>-</option><option>None</option><option>R pain</option><option>L pain</option><option>Bilateral</option></select></td></tr>
+          <tr><td>Internal Rotation</td><td class="rom-normal">0–45°</td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><select class="pain-sel"><option>-</option><option>None</option><option>R pain</option><option>L pain</option><option>Bilateral</option></select></td></tr>
+          <tr><td>External Rotation</td><td class="rom-normal">0–45°</td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><input class="rom-input" type="number" placeholder="°"></td><td><select class="pain-sel"><option>-</option><option>None</option><option>R pain</option><option>L pain</option><option>Bilateral</option></select></td></tr>
+        </tbody>
+      </table>
+      <div class="sec-label" style="margin-top:14px">Gait Observation</div>
+      <div class="check-grid">
+        <label class="check-item"><input type="checkbox"> <span>Trendelenburg gait</span></label>
+        <label class="check-item"><input type="checkbox"> <span>Antalgic gait (shortened stance)</span></label>
+        <label class="check-item"><input type="checkbox"> <span>Circumduction</span></label>
+        <label class="check-item"><input type="checkbox"> <span>Reduced hip extension</span></label>
+        <label class="check-item"><input type="checkbox"> <span>External rotation during walking</span></label>
+        <label class="check-item"><input type="checkbox"> <span>Leg length discrepancy (apparent/real)</span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)"><h3>Muscle Strength Testing (MMT)</h3><span class="badge">MRC Scale 0–5</span><span class="toggle">▾</span></div>
+    <div class="card-body">
+      <table class="rom-table">
+        <thead><tr><th>Muscle Group</th><th>Root</th><th>Right (0–5)</th><th>Left (0–5)</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Hip Flexors (Iliopsoas)</td><td>L1-L2</td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>Hip Extensors (Glut Max)</td><td>L5-S1</td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>Hip Abductors (Glut Med)</td><td>L4-L5</td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>Hip Adductors</td><td>L2-L4</td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>Hip External Rotators</td><td>L5-S1</td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>Knee Extensors (Quads)</td><td>L3-L4</td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><select class="grade-sel"><option>5</option><option>4+</option><option>4</option><option>4-</option><option>3</option><option>2</option><option>1</option><option>0</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: SPECIAL TESTS -->
+<div class="panel" id="tab2">
+  <div class="summary-bar">
+    <div class="sum-item"><div class="sum-val" id="posCount">0</div><div class="sum-lbl">Positive</div></div>
+    <div class="sum-item"><div class="sum-val" id="negCount">0</div><div class="sum-lbl">Negative</div></div>
+    <div class="sum-item"><div class="sum-val" id="doneCount">0</div><div class="sum-lbl">Completed</div></div>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterTests('all',this)">All Tests</button>
+    <button class="filter-btn" onclick="filterTests('impinge',this)">FAI / Impingement</button>
+    <button class="filter-btn" onclick="filterTests('labral',this)">Labral</button>
+    <button class="filter-btn" onclick="filterTests('oa',this)">Osteoarthritis</button>
+    <button class="filter-btn" onclick="filterTests('muscle',this)">Muscle / Tendon</button>
+    <button class="filter-btn" onclick="filterTests('snapping',this)">Snapping Hip</button>
+  </div>
+
+  <div id="testsContainer">
+
+  <!-- FADIR -->
+  <div class="test-card" data-category="impinge">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">FADIR Test (Impingement Test)</span>
+      <div class="test-tags"><span class="tag sens">Sn 78%</span><span class="tag spec">Sp 25%</span><span class="tag impinge">FAI</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine. Examiner on ipsilateral side.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Passively move the hip into Flexion (90°), ADduction (across midline), and Internal Rotation (FADIR). Hold 30 seconds. This compresses the anterior-superior acetabular rim and labrum against the femoral head-neck junction. Positive: reproduction of groin/deep hip pain.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Deep anterior groin pain or the patient's familiar hip pain reproduced. Note: high sensitivity but low specificity — positive in many hip disorders.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Screens for Femoroacetabular Impingement (FAI) — cam, pincer, or mixed morphology — and labral tears. A positive FADIR with negative distraction test supports intra-articular pathology. High sensitivity makes it a good screening test.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="Side, groin/lateral/posterior, severity..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FABER -->
+  <div class="test-card" data-category="oa">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">FABER Test (Patrick's Test)</span>
+      <div class="test-tags"><span class="tag sens">Sn 88%</span><span class="tag spec">Sp 58%</span><span class="tag oa">Hip OA / SIJ</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine. Examiner on ipsilateral side.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Place test leg in Figure-4 position (Flexion, ABduction, External Rotation). Ankle rests above opposite knee. Apply gentle downward overpressure on the bent knee while stabilising contralateral ASIS. Measure the distance from bent knee to table and compare sides.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p><strong>Groin/anterior hip pain:</strong> Hip joint pathology (OA, labral tear, FAI).<br><strong>Lateral hip pain:</strong> Greater trochanteric bursitis / glut tendinopathy.<br><strong>Buttock/SIJ pain:</strong> SIJ dysfunction.<br><strong>Restricted ROM (knee higher than contralateral):</strong> Hip joint stiffness / OA, capsular tightness.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Best single test for hip OA (high sensitivity). Reduced ROM indicates hip OA or capsular restriction. Pain location differentiates hip vs SIJ pathology.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="Side, pain location, ROM restriction..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thomas Test -->
+  <div class="test-card" data-category="muscle">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Thomas Test (Hip Flexor Tightness)</span>
+      <div class="test-tags"><span class="tag sens">Sn 89%</span><span class="tag muscle">Iliopsoas / Rectus Femoris</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine at edge of table. Both knees pulled to chest initially.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Patient holds one knee to chest (flattening the lumbar spine). Allow the opposite leg to lower toward the table.<br><strong>Positive for iliopsoas tightness:</strong> Hip of test leg stays in flexion (does not reach neutral 0°).<br><strong>Positive for rectus femoris tightness:</strong> Knee of test leg extends (does not stay flexed).<br>Measure angle of hip flexion in test leg.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Test leg fails to reach table (hip remains flexed &gt;0°) = iliopsoas tightness. Knee of test leg extends = rectus femoris tightness.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Identifies iliopsoas and/or rectus femoris tightness — common in FAI, hip OA, anterior hip pain, spondylolisthesis, and posterior pelvic tilt compensation. Guides stretching prescription.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="R/L, hip angle, knee extension, iliopsoas/RF..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trendelenburg -->
+  <div class="test-card" data-category="muscle">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Trendelenburg Test</span>
+      <div class="test-tags"><span class="tag sens">Sn 73%</span><span class="tag spec">Sp 77%</span><span class="tag muscle">Gluteus Medius</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Standing. Examiner observes from behind.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Patient stands on one leg (without holding) for 30 seconds. Examiner observes the pelvis level from behind.<br><strong>Normal:</strong> Pelvis on unsupported side rises or stays level (gluteus medius of standing leg is working).<br><strong>Positive:</strong> Pelvis on unsupported (opposite) side drops more than 2 cm below level.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Pelvis drops on the opposite (non-stance) side — indicates weak gluteus medius on the stance side. Also look for ipsilateral trunk lean (compensatory Trendelenburg sign = severe weakness).</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Glut medius weakness — common in hip OA, GT bursitis, gluteal tendinopathy, IT band syndrome, and following THR. Correlates with lateral hip pain and valgus knee collapse. Essential for rehabilitation planning.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="Side, drop amount, trunk lean..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ober Test -->
+  <div class="test-card" data-category="muscle">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Ober Test (IT Band / TFL Tightness)</span>
+      <div class="test-tags"><span class="tag muscle">IT Band / TFL</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Sidelying with affected side up. Lower hip and knee flexed for stability.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Examiner stands behind patient. Stabilise the pelvis with one hand. With the other, flex the upper knee to 90° and abduct and extend the upper hip (to get the iliotibial band behind the greater trochanter). Then RELEASE the leg — allow gravity to adduct the leg. Normal: leg falls/adducts to at least neutral. Positive: leg remains abducted (cannot adduct past horizontal).</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Test leg stays in abduction and does not fall to the table — indicates tight IT band / TFL. Compare sides.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>IT band tightness is associated with trochanteric bursitis, lateral knee pain (ITBS), and snapping hip syndrome (coxa saltans externa). Guides foam rolling and stretching programmes.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="Side, degree of restriction..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 90-90 SLR Hamstring -->
+  <div class="test-card" data-category="muscle">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">90-90 Test (Hamstring Tightness)</span>
+      <div class="test-tags"><span class="tag muscle">Hamstrings</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine with hip and knee of test leg flexed to 90°.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Hold the thigh perpendicular to the table (90° hip flexion). Ask patient to actively extend the knee as much as possible. Measure the popliteal angle (angle of knee from full extension).<br>Normal: popliteal angle &lt;20° (knee close to full extension).<br>Positive (tightness): popliteal angle &gt;20°.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Knee cannot fully extend — popliteal angle &gt;20°. Greater angle = more tightness. Note: differentiate from sciatic nerve tension (neurodynamic component).</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Hamstring tightness contributes to posterior pelvic tilt, increased lumbar flexion loading, and hip impingement. Common in athletes, adolescents, and desk workers. Guides hamstring stretching protocol.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="R/L, popliteal angle..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anterior Labral Tear Test -->
+  <div class="test-card" data-category="labral">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Anterior Labral Tear Test</span>
+      <div class="test-tags"><span class="tag labral">Labral Tear</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Examiner takes the hip into full flexion, external rotation and abduction. Then moves the hip into extension, internal rotation and adduction while applying an axial load through the femur. A positive test produces a click or reproduction of groin pain during this arc.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Palpable or audible click with reproduction of groin pain during the arc of motion (flexion-ER-ABD to extension-IR-ADD).</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Suggests anterior acetabular labral pathology. Confirm with MR arthrography. Combined with FADIR, increases diagnostic accuracy for labral tears.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="Click/pain/both, groin location..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Posterior Labral Tear Test -->
+  <div class="test-card" data-category="labral">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Posterior Labral Tear / Posterior Impingement Test</span>
+      <div class="test-tags"><span class="tag labral">Posterior Labral / FAI</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine at edge of table with affected hip hanging off.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Patient holds contralateral knee to chest. Allow affected leg to hang in extension. Examiner then moves the hanging hip into extension and external rotation, applying axial compression. Positive: reproduction of posterior hip or buttock pain.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Posterior hip or deep buttock pain reproduced with extension and external rotation.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Suggests posterior acetabular rim impingement, posterior labral tear, or ischiofemoral impingement. Less common than anterior FAI but important in extension-based athletes (dancers, gymnasts, javelin throwers).</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="Side, posterior buttock vs deep hip..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scour Test -->
+  <div class="test-card" data-category="oa">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Scour Test (Quadrant Test)</span>
+      <div class="test-tags"><span class="tag oa">Hip OA / Intra-articular</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine. Hip flexed to 90° with knee bent.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Apply axial compression through the femur (push toward the acetabulum). While maintaining compression, rotate the hip in an arc through abduction→flexion→adduction→extension (the "scour" movement). Essentially, the femoral head is being moved around the acetabulum under compression.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Reproduction of groin pain, deep hip pain, or clunking at a specific arc position. Crepitus indicates degenerative changes (OA). Pain location and arc position indicate pathological zone.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Indicates intra-articular hip pathology — hip OA, acetabular cartilage damage, loose bodies, or labral tears. Crepitus is a strong indicator of cartilage degeneration. Guides imaging (X-ray for OA; MRA for labral).</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="Crepitus, arc of pain, groin/lateral..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hip Distraction Test -->
+  <div class="test-card" data-category="oa">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Hip Distraction Test</span>
+      <div class="test-tags"><span class="tag oa">Intra-articular vs Extra-articular</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine. Hip and knee extended.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Apply traction (distraction) to the hip by pulling the leg distally along its axis while stabilising the pelvis. Hold 30 seconds. If this RELIEVES pain previously produced by impingement tests (FADIR/Scour) — confirms intra-articular pathology.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Relief of pain with distraction (decompresses the joint) confirms that pain is intra-articular. Absence of relief suggests extra-articular pain source.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Key differentiator: intra-articular vs extra-articular hip pain. Positive distraction = labral tear, OA, chondral damage. Negative distraction = tendinopathy, bursitis, muscle tear.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Relief (Intra-articular)</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− No Change (Extra-articular)</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="% pain relief, intra vs extra..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Snapping Hip Test -->
+  <div class="test-card" data-category="snapping">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Snapping Hip Assessment (Coxa Saltans)</span>
+      <div class="test-tags"><span class="tag muscle">Snapping Hip</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Procedure (by type)</h5><p><strong>External Snapping (Coxa Saltans Externa):</strong> IT band/TFL snapping over GT. Ask patient to replicate the snap by standing and flexing/extending the hip. Palpate over greater trochanter. Positive: palpable/audible snap over GT.<br><br><strong>Internal Snapping (Coxa Saltans Interna):</strong> Iliopsoas tendon snapping over iliopectineal eminence. Patient sidelying, move hip from flexion/abduction/ER to extension. Positive: snap felt/heard in groin area.<br><br><strong>Intra-articular Snap:</strong> Labral tear / loose body — deep, often painful click. Assess with FADIR and Scour tests.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Palpable or audible snapping. Key question: is it PAINFUL? Painless = likely benign. Painful = warrants investigation for labral involvement or bursitis.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>External: GT bursitis, IT band tightness. Internal: Iliopsoas bursitis/tendinopathy. Intra-articular: labral tear (requires MRA to confirm). Classification guides treatment.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Painful Snap</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− No Snap</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">Painless Snap</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="Type (ext/int/intra-articular), location..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GT Bursitis Test -->
+  <div class="test-card" data-category="muscle">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Greater Trochanteric Bursitis / Gluteal Tendinopathy Test</span>
+      <div class="test-tags"><span class="tag muscle">GT Bursitis / Glut Tendinopathy</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Procedure</h5><p><strong>Palpation:</strong> Direct palpation over the greater trochanter and its posterior facet. Positive: point tenderness directly over the GT.<br><br><strong>Ober Test:</strong> IT band tightness increases compressive load on the GT bursa.<br><br><strong>Single Leg Stance:</strong> Lateral hip pain with prolonged standing on the affected leg.<br><br><strong>Cross-leg Test:</strong> Sitting, cross affected leg over the other. Lateral hip pain = positive for GT bursitis/tendinopathy.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Localised GT point tenderness. Pain with single-leg loading or crossing the leg. Lateral hip pain worse after prolonged sitting or walking on uneven ground.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Greater trochanteric pain syndrome (GTPS) — umbrella term including GT bursitis and gluteal tendinopathy. More common in women, particularly menopausal. Avoid compressive loads (cross-legged sitting, hip adduction in bed, stretching into adduction).</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="GT tenderness, cross-leg test, bursitis vs tendinopathy..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stinchfield Test -->
+  <div class="test-card" data-category="oa">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Stinchfield Test (Resisted Hip Flexion)</span>
+      <div class="test-tags"><span class="tag oa">Intra-articular / Iliopsoas</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine with hip flexed to 30–45°, knee fully extended.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Ask patient to actively hold the hip at 30–45° flexion. Examiner applies a downward resistance force (toward table) at the knee or distal thigh. Patient resists this force.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p><strong>Groin/anterior hip pain:</strong> Intra-articular pathology (labral tear, OA, chondral damage, loose body).<br><strong>Anterior hip/groin pain without intra-articular pain:</strong> Iliopsoas strain / tendinopathy.<br>Weakness without pain = L2-L3 nerve root or hip flexor tear.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>Differentiates intra-articular from extra-articular (iliopsoas) groin pain. Very useful in clinical practice — easy to perform and interpret.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="Groin pain / weakness, intra vs extra-articular..."></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Roll Test -->
+  <div class="test-card" data-category="oa">
+    <div class="test-head" onclick="toggleTest(this)">
+      <span class="test-name">Log Roll Test</span>
+      <div class="test-tags"><span class="tag oa">Hip OA / Intra-articular</span><span class="tag spec">Sp 98%</span></div>
+      <span class="test-expand">▶</span>
+    </div>
+    <div class="test-body">
+      <div class="test-section"><h5>Patient Position</h5><p>Supine with legs fully extended.</p></div>
+      <div class="test-section"><h5>Procedure</h5><p>Gently roll the entire lower extremity inward (IR) and outward (ER) with the hip and knee extended. This produces purely rotational movement of the femoral head in the acetabulum with minimal involvement of periarticular structures.</p></div>
+      <div class="test-section"><h5>Positive Finding</h5><p>Reproduction of groin/anterior hip pain with log rolling. Highly specific (98%) for intra-articular hip pathology.</p></div>
+      <div class="test-section"><h5>Clinical Significance</h5><p>The most specific single test for hip joint pathology. When positive, highly diagnostic of intra-articular source. Most useful for confirming OA, avascular necrosis, or significant intra-articular disease.</p></div>
+      <div class="test-result">
+        <label>Result:</label>
+        <div class="result-btns">
+          <button class="rbtn pos" onclick="setResult(this,'positive')">+ Positive</button>
+          <button class="rbtn neg" onclick="setResult(this,'negative')">− Negative</button>
+          <button class="rbtn equi" onclick="setResult(this,'equivocal')">≈ Equivocal</button>
+        </div>
+        <div class="test-notes"><input type="text" placeholder="IR/ER/both, groin pain..."></div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</div>
+
+<!-- TAB 3: NEURO SCREEN -->
+<div class="panel" id="tab3">
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)"><h3>Dermatomal Sensation</h3><span class="badge">Sensory</span><span class="toggle">▾</span></div>
+    <div class="card-body">
+      <table class="neuro-table">
+        <thead><tr><th>Root</th><th>Area</th><th>Right</th><th>Left</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>L1</td><td>Groin / Inguinal</td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>L2</td><td>Anterior upper thigh</td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>L3</td><td>Anterior medial thigh</td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>L4</td><td>Medial lower leg</td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>L5</td><td>Dorsum of foot / Big toe</td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+          <tr><td>S1</td><td>Lateral foot / Posterior calf</td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><select class="grade-sel"><option>Intact</option><option>Diminished</option><option>Absent</option></select></td><td><input type="text" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)"><h3>Reflexes</h3><span class="badge">DTR</span><span class="toggle">▾</span></div>
+    <div class="card-body">
+      <table class="neuro-table">
+        <thead><tr><th>Reflex</th><th>Root</th><th>Right</th><th>Left</th></tr></thead>
+        <tbody>
+          <tr><td>Patellar</td><td>L3–L4</td><td><select class="grade-sel"><option>2+ Normal</option><option>0 Absent</option><option>1+ Dim</option><option>3+ Brisk</option></select></td><td><select class="grade-sel"><option>2+ Normal</option><option>0 Absent</option><option>1+ Dim</option><option>3+ Brisk</option></select></td></tr>
+          <tr><td>Achilles</td><td>S1–S2</td><td><select class="grade-sel"><option>2+ Normal</option><option>0 Absent</option><option>1+ Dim</option><option>3+ Brisk</option></select></td><td><select class="grade-sel"><option>2+ Normal</option><option>0 Absent</option><option>1+ Dim</option><option>3+ Brisk</option></select></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: DIFFERENTIAL DX -->
+<div class="panel" id="tab4">
+  <div class="dx-category">
+    <h4>🟣 Intra-Articular</h4>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Hip Osteoarthritis</h5><p>Age &gt;50, groin pain, restricted ROM (especially IR), stiffness, +FABER, +Log Roll, +Scour. Joint space narrowing on X-ray.</p><span class="icd">M16.1 — Primary OA, hip</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Femoroacetabular Impingement (FAI)</h5><p>Young active patient, groin pain, +FADIR, cam/pincer on X-ray, restricted IR. Sports-related.</p><span class="icd">M24.85 — Other specific joint derangements, hip</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Acetabular Labral Tear</h5><p>Deep groin pain, +FADIR, clicking/catching, +Anterior labral tear test, MRA positive.</p><span class="icd">S73.01 — Subluxation of right hip joint</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Avascular Necrosis (AVN)</h5><p>Steroid/alcohol use history, deep groin pain, progressive ROM loss, MRI shows bone oedema/necrosis. Urgent.</p><span class="icd">M87.05 — Idiopathic aseptic necrosis of femur</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Loose Body / Chondral Lesion</h5><p>Locking, catching, +Scour (crepitus), history of trauma or OA.</p><span class="icd">M24.05 — Loose body in hip joint</span></div></div>
+  </div>
+  <div class="dx-category">
+    <h4>🟡 Extra-Articular / Soft Tissue</h4>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Greater Trochanteric Pain Syndrome (GT Bursitis / Glut Tendinopathy)</h5><p>Lateral hip pain, +GT palpation tenderness, +Trendelenburg, worse lying on side, +Ober test.</p><span class="icd">M70.60 — Trochanteric bursitis, unspecified hip</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Iliopsoas Tendinopathy / Bursitis</h5><p>Anterior groin pain, +Stinchfield, internal snapping, worse with hip flexion activities.</p><span class="icd">M70.50 — Trochanteric bursitis (alt coding)</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Snapping Hip Syndrome (Coxa Saltans)</h5><p>Audible/palpable snap, +Snapping hip test. External=IT band/TFL; Internal=iliopsoas; Intra-articular=labrum.</p><span class="icd">M67.35 — Transient synovitis, hip</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Adductor Strain / Tendinopathy</h5><p>Medial thigh/groin pain, +resisted adduction, tenderness at pubic symphysis/proximal adductors. Athletic population.</p><span class="icd">S76.21 — Strain of adductor muscle of thigh</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Hamstring Proximal Tendinopathy</h5><p>Ischial tuberosity pain, worse sitting/sprinting, +hamstring strength testing provokes pain.</p><span class="icd">M76.89 — Other enthesopathies of lower limb</span></div></div>
+  </div>
+  <div class="dx-category">
+    <h4>🔴 Referred / Serious</h4>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Lumbar Radiculopathy (Referred to Hip)</h5><p>L2/L3 radiculopathy mimics hip pain. Normal hip ROM, +SLR or FNST, dermatomal pattern.</p><span class="icd">M54.4 — Lumbago with sciatica</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Septic Arthritis</h5><p>Fever, inability to weight bear, progressive rapid onset, elevated WBC/CRP. MEDICAL EMERGENCY.</p><span class="icd">M00.85 — Arthritis due to other bacteria, hip</span></div></div>
+    <div class="dx-item" onclick="toggleDx(this)"><input type="checkbox"><div class="dx-item-info"><h5>Hip Fracture / Stress Fracture</h5><p>Elderly (falls) or young athlete (overuse). Severe groin pain on weight-bearing, confirm with MRI.</p><span class="icd">S72.001A — Fracture of femoral neck</span></div></div>
+  </div>
+  <div class="form-row one" style="margin-top:10px">
+    <div class="field"><label>Working Diagnosis / Clinical Impression</label><textarea id="workingDx" placeholder="Primary and secondary diagnoses..." style="min-height:80px;"></textarea></div>
+  </div>
+</div>
+
+<!-- TAB 5: OUTCOME SCORES -->
+<div class="panel" id="tab5">
+  <div class="score-card">
+    <div class="score-title">HOOS-12 (Hip Disability & OA Outcome Score — Short Form)</div>
+    <div class="score-q"><p>1. Descending stairs</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-q"><p>2. Bending to floor/picking up an object</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-q"><p>3. Rising from sitting</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-q"><p>4. Standing (30 min)</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-q"><p>5. Walking on flat surface</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-q"><p>6. Getting in/out of car</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-q"><p>7. Going shopping</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-q"><p>8. Putting on socks/stockings</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-q"><p>9. Hip pain — how often?</p><select onchange="calcHOOS()"><option value="0">Never</option><option value="1">Monthly</option><option value="2">Weekly</option><option value="3">Daily</option><option value="4">Always</option></select></div>
+    <div class="score-q"><p>10. Aware of hip problem always?</p><select onchange="calcHOOS()"><option value="0">Never</option><option value="1">Rarely</option><option value="2">Sometimes</option><option value="3">Often</option><option value="4">Always</option></select></div>
+    <div class="score-q"><p>11. Hip stiffness after waking in morning?</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-q"><p>12. Hip stiffness after sitting/lying later in day?</p><select onchange="calcHOOS()"><option value="0">None</option><option value="1">Mild</option><option value="2">Moderate</option><option value="3">Severe</option><option value="4">Extreme</option></select></div>
+    <div class="score-result">
+      <div class="score-num" id="hoosScore">100</div>
+      <div class="score-label" id="hoosLabel">Interpretation: 100 = no symptoms, 0 = extreme symptoms</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)"><h3>NPRS Tracking</h3><span class="badge">Pain Scale</span><span class="toggle">▾</span></div>
+    <div class="card-body">
+      <div class="form-row three">
+        <div class="field"><label>Current Pain (0–10)</label><input type="number" min="0" max="10" placeholder="e.g. 5"></div>
+        <div class="field"><label>Best (0–10)</label><input type="number" min="0" max="10" placeholder="e.g. 1"></div>
+        <div class="field"><label>Worst (0–10)</label><input type="number" min="0" max="10" placeholder="e.g. 8"></div>
+      </div>
+      <div class="field" style="margin-top:8px"><label>MCID for hip OA = 1.8 points. GROC threshold = +5.</label><textarea placeholder="Track progress across sessions..."></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 6: LOG -->
+<div class="panel" id="tab6">
+  <div class="log-toolbar">
+    <button class="btn btn-primary" onclick="saveLog()">+ Save Assessment</button>
+    <button class="btn btn-ghost" onclick="printLog()">🖨 Print</button>
+    <button class="btn btn-ghost" onclick="clearLog()">🗑 Clear</button>
+  </div>
+  <div class="field" style="margin-bottom:14px">
+    <label>Session Notes</label>
+    <textarea class="log-textarea" id="sessionNotes" placeholder="Clinical reasoning, treatment plan, goals..."></textarea>
+  </div>
+  <div id="logContainer"></div>
+</div>
+
+</div>
+
+<!-- FLOATING ACTION BAR -->
+<div class="fab-bar">
+  <button class="fab-btn fab-wa" onclick="shareWhatsApp()"><span class="fab-icon">📱</span> WhatsApp</button>
+  <button class="fab-btn fab-pdf" onclick="printSession()"><span class="fab-icon">⎙</span> Save PDF</button>
+</div>
+
+<script>
+const tabs=document.querySelectorAll('.tab'),panels=document.querySelectorAll('.panel');
+function switchTab(i){tabs.forEach((t,j)=>t.classList.toggle('active',i===j));panels.forEach((p,j)=>p.classList.toggle('active',i===j));}
+function toggleCard(head){head.classList.toggle('collapsed');const body=head.nextElementSibling;body.style.display=head.classList.contains('collapsed')?'none':'block';}
+function toggleTest(head){const body=head.nextElementSibling;const icon=head.querySelector('.test-expand');const isOpen=body.classList.contains('open');body.classList.toggle('open',!isOpen);icon.classList.toggle('open',!isOpen);}
+function setResult(btn,type){const btns=btn.parentElement.querySelectorAll('.rbtn');btns.forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');updateCounts();}
+function updateCounts(){const pos=document.querySelectorAll('.rbtn.pos.sel').length;const neg=document.querySelectorAll('.rbtn.neg.sel').length;document.getElementById('posCount').textContent=pos;document.getElementById('negCount').textContent=neg;document.getElementById('doneCount').textContent=pos+neg+document.querySelectorAll('.rbtn.equi.sel').length;}
+function filterTests(cat,btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.test-card').forEach(card=>{card.style.display=(cat==='all'||card.dataset.category===cat)?'block':'none';});}
+function updateVAS(){const val=document.getElementById('vasSlider').value;document.getElementById('vasValue').textContent=val;document.getElementById('vasThumb').style.left=(val*10)+'%';}
+function toggleDx(item){const cb=item.querySelector('input');cb.checked=!cb.checked;item.classList.toggle('selected',cb.checked);}
+function calcHOOS(){const sels=document.querySelectorAll('.score-card select');let total=0;sels.forEach(s=>total+=parseInt(s.value));const score=Math.round(100-(total/48)*100);document.getElementById('hoosScore').textContent=score;document.getElementById('hoosLabel').textContent=score>=75?'Mild disability':score>=50?'Moderate disability':score>=25?'Severe disability':'Extreme disability';}
+let logs=JSON.parse(localStorage.getItem('hip_logs')||'[]');
+function saveLog(){const pt=document.getElementById('ptName').value||'Unknown';const date=document.getElementById('ptDate').value||new Date().toISOString().split('T')[0];const wdx=document.getElementById('workingDx').value||'Not documented';const notes=document.getElementById('sessionNotes').value||'';const pos=document.querySelectorAll('.rbtn.pos.sel').length;const neg=document.querySelectorAll('.rbtn.neg.sel').length;logs.unshift({id:Date.now(),pt,date,wdx,notes,pos,neg});localStorage.setItem('hip_logs',JSON.stringify(logs));renderLog();}
+function renderLog(){const c=document.getElementById('logContainer');if(!logs.length){c.innerHTML='<p style="font-size:12px;color:#95a5a6;text-align:center;padding:24px">No entries yet.</p>';return;}c.innerHTML=logs.map(e=>`<div class="log-entry"><div class="log-entry-header"><h4>${e.pt}</h4><span>${e.date}</span></div><p><strong>Dx:</strong> ${e.wdx}</p><p style="margin-top:4px"><strong>Tests:</strong> ${e.pos} positive, ${e.neg} negative</p>${e.notes?`<p style="margin-top:4px"><strong>Notes:</strong> ${e.notes}</p>`:''}<div class="log-actions"><button class="btn btn-danger" style="padding:5px 12px;font-size:11px" onclick="delLog(${e.id})">Delete</button></div></div>`).join('');}
+function delLog(id){logs=logs.filter(e=>e.id!==id);localStorage.setItem('hip_logs',JSON.stringify(logs));renderLog();}
+function clearLog(){if(confirm('Clear all?')){logs=[];localStorage.setItem('hip_logs','[]');renderLog();}}
+function printSession(){
+  document.querySelectorAll('.panel').forEach(el=>{el.setAttribute('data-was',el.classList.contains('active')?'1':'0');el.style.display='block';});
+  window.print();
+  setTimeout(()=>{document.querySelectorAll('.panel').forEach(el=>{el.style.display=el.getAttribute('data-was')==='1'?'block':'none';});},1000);
+}
+function shareWhatsApp(){
+  const name=document.getElementById('ptName').value||'Unknown Patient';
+  const age=document.getElementById('ptAge').value||'—';
+  const sex=document.getElementById('ptSex').value||'—';
+  const dateVal=document.getElementById('ptDate').value;
+  const date=dateVal?new Date(dateVal).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):new Date().toLocaleDateString('en-IN');
+  const wdx=document.getElementById('workingDx')?.value||'—';
+  const notes=document.getElementById('sessionNotes')?.value||'';
+  const pos=document.querySelectorAll('.rbtn.pos.sel').length;
+  const neg=document.querySelectorAll('.rbtn.neg.sel').length;
+  const hoosScore=document.getElementById('hoosScore')?.textContent||'—';
+  const posDxItems=[...document.querySelectorAll('.dx-item.selected span:last-child')].map(e=>e.textContent.trim());
+  let msg=`🦴 *HipScreen Pro — VPARC*\n`;
+  msg+=`━━━━━━━━━━━━━━━━━━━\n`;
+  msg+=`👤 *Patient:* ${name}  |  Age: ${age}  |  ${sex}\n`;
+  msg+=`📅 *Date:* ${date}\n`;
+  msg+=`━━━━━━━━━━━━━━━━━━━\n`;
+  msg+=`✅ *Positive Tests:* ${pos}  |  ❌ *Negative:* ${neg}\n`;
+  if(posDxItems.length) msg+=`🔍 *Differential Dx:* ${posDxItems.slice(0,4).join(' | ')}\n`;
+  if(wdx&&wdx!=='—') msg+=`📋 *Working Dx:* ${wdx}\n`;
+  if(hoosScore!=='—'&&hoosScore!=='100') msg+=`📊 *HOOS Score:* ${hoosScore}/100\n`;
+  if(notes) msg+=`📝 *Notes:* ${notes}\n`;
+  msg+=`━━━━━━━━━━━━━━━━━━━\n`;
+  msg+=`_VPARC Physiotherapy & Rehabilitation Centre_\n`;
+  msg+=`_${new Date().toLocaleString('en-IN')}_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+function savePatient(){localStorage.setItem('hip_pt',JSON.stringify({name:document.getElementById('ptName').value,age:document.getElementById('ptAge').value,sex:document.getElementById('ptSex').value,date:document.getElementById('ptDate').value,id:document.getElementById('ptId').value}));}
+renderLog();
+document.getElementById('ptDate').value=new Date().toISOString().split('T')[0];
+const saved=JSON.parse(localStorage.getItem('hip_pt')||'null');
+if(saved){document.getElementById('ptName').value=saved.name||'';document.getElementById('ptAge').value=saved.age||'';document.getElementById('ptSex').value=saved.sex||'';document.getElementById('ptId').value=saved.id||'';}
+</script>
+<script>
+// PWA Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+}</script>
+</body>
+</html>
